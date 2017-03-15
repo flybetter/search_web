@@ -1,11 +1,10 @@
-import org.apache.poi.hssf.usermodel.HSSFRow;
-import org.apache.poi.hssf.usermodel.HSSFSheet;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.hssf.usermodel.*;
+import org.apache.poi.ss.usermodel.CellStyle;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -52,23 +51,105 @@ public class ExcelPOI {
     }
 
 
-    public void write(String path,ResultType resultType,int rowNum) throws Exception{
+    public void write(ResultType resultType,String jarName,Integer rowNum) throws Exception{
 
-        InputStream in=new FileInputStream(path);
+        InputStream in=new FileInputStream("//Users/wubingyu/Downloads/after_review４.xls");
 
-        HSSFWorkbook workbook=new HSSFWorkbook(in);
+        // 第一步，创建一个webbook，对应一个Excel文件
+        HSSFWorkbook wb = new HSSFWorkbook(in);
 
-        in.close();
+        if (in != null) {
+            try {
+                in.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        // 第二步，在webbook中添加一个sheet,对应Excel文件中的sheet
+        HSSFSheet sheet = wb.getSheet("sheet");
+        // 第三步，在sheet中添加表头第0行,注意老版本poi对Excel的行数列数有限制short
+        HSSFRow row = sheet.createRow((int) 0);
+        // 第四步，创建单元格，并设置值表头 设置表头居中
+        HSSFCellStyle style = wb.createCellStyle();
+        style.setAlignment((Short) CellStyle.ALIGN_CENTER); // 创建一个居中格式
+        HSSFCell cell = row.createCell(0);
+        cell.setCellValue("jar包名");
+        cell.setCellStyle(style);
+        cell = row.createCell(1);
+        cell.setCellValue("jar包上级文件名");
+        cell.setCellStyle(style);
 
-        FileOutputStream out=new FileOutputStream(path);
+        // 第五步，写入实体数据 实际应用中这些数据从数据库得到，
+//	    List list = CreateSimpleExcelToDisk.getStudent();
+        //
+//	    for (int i = 0; i < list.size(); i++)
+//	    {
+//	        row = sheet.createRow((int) i + 1);
+//	        Student stu = (Student) list.get(i);
+//	        // 第四步，创建单元格，并设置值
+//	        row.createCell((short) 0).setCellValue((double) stu.getId());
+//	        row.createCell((short) 1).setCellValue(stu.getName());
+//	        row.createCell((short) 2).setCellValue((double) stu.getAge());
+//	        cell = row.createCell((short) 3);
+//	        cell.setCellValue(new SimpleDateFormat("yyyy-mm-dd").format(stu
+//	                .getBirth()));
+//	    }
 
-        HSSFSheet sheet=workbook.getSheetAt(0);
+//        for(int i=0;i<list.size();i++) {
+//            row = sheet.createRow((int) i + 1);
+//            row.createCell(0).setCellValue(list.get(i).getName());
+//            String aa[]=list.get(i).getPath().split("\\\\");
+//            row.createCell(1).setCellValue(aa[aa.length-2]);
+//            boolean flag=false;
+//            for(int j=0;j<aa.length;j++){
+//                if(aa[j].equalsIgnoreCase("sw_comps_Nms")){
+//                    flag=true;
+//                }
+//                if(flag){
+//                    row.createCell(j+2).setCellValue(aa[j]);
+//                }
+//            }
+//        }
+//        System.out.println("完成了！");
 
-        sheet.getRow(1).getCell(4).setCellValue("haha");
+        HSSFRow rowTemp=sheet.createRow(rowNum+1);
+//        rowTemp.createCell(0).setCellValue(jarName);
+        if (resultType.getType()==1){
+            rowTemp.createCell(3).setCellValue(resultType.getResult());
+        }else{
+            rowTemp.createCell(3).setCellValue("");
+        }
 
-        workbook.write(out);
+        if (resultType.getType()==2){
+            rowTemp.createCell(4).setCellValue(resultType.getResult());
+        }else{
+            rowTemp.createCell(4).setCellValue("");
+        }
 
-        out.close();
+        if (resultType.getType()==3){
+            rowTemp.createCell(5).setCellValue(resultType.getResult());
+        }else{
+            rowTemp.createCell(5).setCellValue("");
+        }
+
+        if (resultType.getType()==4){
+            rowTemp.createCell(6).setCellValue(resultType.getResult());
+        }else{
+            rowTemp.createCell(6).setCellValue("");
+        }
+
+        // 第六步，将文件存到指定位置
+        try
+        {
+            FileOutputStream fout = new FileOutputStream("//Users/wubingyu/Downloads/after_review４.xls");
+            wb.write(fout);
+            fout.close();
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+
+        }
 
     }
 
@@ -77,24 +158,19 @@ public class ExcelPOI {
         InputStream in=new FileInputStream("//Users/wubingyu/Downloads/after_review４.xls");
 
         ExcelPOI excelPOI=new ExcelPOI();
-//        JsoupTest jsoupTest =new JsoupTest();
-//
-//        List<String> result=excelPOI.read(in);
-//
-//        for (int i = 0; i <result.size() ; i++) {
-//
-//            System.out.println("行数"+i+"："+result.get(i));
-//            ResultType jsoupResult=jsoupTest.readDetail(result.get(i));
-//            System.out.println(jsoupResult.toString());
-//
-//            System.out.println();
-//
-//
-//        }
-        String path="//Users/wubingyu/Downloads/after_review４.xls";
+        JsoupTest jsoupTest =new JsoupTest();
 
-        excelPOI.write(path,null,4);
+        List<String> result=excelPOI.read(in);
 
+        for (int i = 0; i <result.size() ; i++) {
+
+            System.out.println("行数"+i+"："+result.get(i));
+            ResultType jsoupResult=jsoupTest.readDetail(result.get(i));
+            excelPOI.write(jsoupResult,result.get(i),i);
+            System.out.println(jsoupResult.toString());
+            System.out.println();
+
+        }
 
     }
 
